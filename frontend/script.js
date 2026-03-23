@@ -25,14 +25,14 @@ function getLocalStream() {
       detector.minVolumeDecibels = -10;
       const input = new Float32Array(detector.inputLength);
       setInterval(() => {
-        if (socket.readyState === 1) {
-          [normalizedPitch, normalizedClarity] = updatePitch(
-            analyserNode,
-            detector,
-            input,
-            audioContext.sampleRate,
-          );
+        [normalizedPitch, normalizedClarity] = updatePitch(
+          analyserNode,
+          detector,
+          input,
+          audioContext.sampleRate,
+        );
 
+        if (socket.readyState === 1) {
           socket.send(
             JSON.stringify({
               pitch: normalizedPitch,
@@ -40,8 +40,6 @@ function getLocalStream() {
             }),
           );
         }
-
-        updatePitch(analyserNode, detector, input, audioContext.sampleRate);
       }, 100);
     })
     .catch((err) => {
@@ -51,8 +49,7 @@ function getLocalStream() {
   socket.addEventListener("message", (event) => {
     note = JSON.parse(event).note ?? "";
 
-    document.getElementById("note").textContent =
-      String.toString(note).toUpperCase();
+    document.getElementById("note").textContent = note.toUpperCase();
   });
 }
 
