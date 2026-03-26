@@ -25,3 +25,14 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 jamsitant-*.tar
 
+
+# Devenv
+.devenv*
+devenv.local.nix
+devenv.local.yaml
+
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml
