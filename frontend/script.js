@@ -1,4 +1,5 @@
-import { PitchDetector } from "https://esm.sh/pitchy@4";
+import { PitchDetector } from "pitchy";
+import socket, { channel } from "./note_socket.js";
 
 function updatePitch(analyserNode, detector, input, sampleRate) {
   analyserNode.getFloatTimeDomainData(input);
@@ -13,7 +14,6 @@ function updatePitch(analyserNode, detector, input, sampleRate) {
 }
 
 function getLocalStream() {
-  const socket = new WebSocket("ws://localhost:4000/notes_socket");
   const audioContext = new window.AudioContext();
   const analyserNode = audioContext.createAnalyser();
 
@@ -25,32 +25,31 @@ function getLocalStream() {
       detector.minVolumeDecibels = -10;
       const input = new Float32Array(detector.inputLength);
       setInterval(() => {
-        [normalizedPitch, normalizedClarity] = updatePitch(
+        const [normalizedPitch, normalizedClarity] = updatePitch(
           analyserNode,
           detector,
           input,
           audioContext.sampleRate,
         );
 
-        if (socket.readyState === 1) {
-          socket.send(
-            JSON.stringify({
-              pitch: normalizedPitch,
-              clarity: normalizedClarity,
-            }),
-          );
-        }
+        channel
+          .push("frequency_to_note", {
+            pitch: normalizedPitch,
+            clarity: normalizedClarity,
+          })
+          .receive("ok", (payload) => {
+            console.log("Payload: ", payload);
+            const note = payload.note ?? "";
+            console.log("Parsed note: ", note);
+            document.getElementById("note").textContent = note.toUpperCase();
+          })
+          .receive("error", (err) => console.log(`Phoenix errored ${err}`))
+          .receive("timeout", (err) => console.log("Phoenix errored", err));
       }, 100);
     })
     .catch((err) => {
       console.error(`you got an error: ${err}`);
     });
-
-  socket.addEventListener("message", (event) => {
-    note = JSON.parse(event).note ?? "";
-
-    document.getElementById("note").textContent = note.toUpperCase();
-  });
 }
 
 getLocalStream();

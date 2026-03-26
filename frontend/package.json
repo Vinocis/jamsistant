@@ -4,13 +4,19 @@
   "description": "",
   "main": "script.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "esbuild script.js --bundle --minify --outfile=dist/bundle.js",
+    "watch": "esbuild script.js --bundle --outfile=dist/bundle.js --watch"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
+    "esbuild": "^0.27.4",
     "live-server": "^1.2.2"
+  },
+  "dependencies": {
+    "phoenix": "^1.8.5",
+    "pitchy": "^4.1.0"
   }
 }
